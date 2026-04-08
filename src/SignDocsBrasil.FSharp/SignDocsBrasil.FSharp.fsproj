@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn>FS3261</NoWarn>
 
     <PackageId>SignDocsBrasil.FSharp</PackageId>
     <Version>1.0.0</Version>
