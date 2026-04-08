@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+    <PackageId>SignDocsBrasil.FSharp</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>SignDocsBrasil</Authors>
+    <Description>Idiomatic F# wrapper for the SignDocsBrasil .NET SDK</Description>
+    <PackageTags>signdocs;brasil;api;sdk;fsharp</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/signdocsbrasil/signdocs</RepositoryUrl>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Errors.fs" />
+    <Compile Include="Client.fs" />
+    <Compile Include="Internal.fs" />
+    <Compile Include="Health.fs" />
+    <Compile Include="Transactions.fs" />
+    <Compile Include="Documents.fs" />
+    <Compile Include="Steps.fs" />
+    <Compile Include="Signing.fs" />
+    <Compile Include="Evidence.fs" />
+    <Compile Include="Verification.fs" />
+    <Compile Include="Users.fs" />
+    <Compile Include="Webhooks.fs" />
+    <Compile Include="DocumentGroups.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SignDocsBrasil.Api\SignDocsBrasil.Api.csproj" />
+    <PackageReference Include="FsToolkit.ErrorHandling.TaskResult" Version="4.18.0" />
+  </ItemGroup>
+
+</Project>
