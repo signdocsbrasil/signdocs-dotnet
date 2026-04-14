@@ -13,12 +13,14 @@ public record VerificationResponse(
     [property: JsonPropertyName("signer")] VerificationSigner? Signer,
     [property: JsonPropertyName("steps")] List<VerificationStep>? Steps,
     [property: JsonPropertyName("tenantName")] string? TenantName,
+    [property: JsonPropertyName("tenantCnpj")] string? TenantCnpj,
     [property: JsonPropertyName("createdAt")] string? CreatedAt,
     [property: JsonPropertyName("completedAt")] string? CompletedAt
 );
 
 public record VerificationSigner(
-    [property: JsonPropertyName("displayName")] string? DisplayName
+    [property: JsonPropertyName("displayName")] string? DisplayName,
+    [property: JsonPropertyName("cpfCnpj")] string? CpfCnpj = null
 );
 
 public record VerificationStep(

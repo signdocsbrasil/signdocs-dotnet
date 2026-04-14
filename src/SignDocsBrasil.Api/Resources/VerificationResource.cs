@@ -32,4 +32,25 @@ public sealed class VerificationResource
             timeout: timeout,
             ct: ct).ConfigureAwait(false);
     }
+
+    /// <summary>
+    /// Verifies a multi-signer envelope by its ID. Returns envelope status,
+    /// the list of signers (each with an <c>EvidenceId</c> for drill-down via
+    /// <see cref="VerifyAsync"/>), and consolidated download URLs. For
+    /// non-PDF envelopes signed with digital certificates, the consolidated
+    /// <c>.p7s</c> containing every signer's <c>SignerInfo</c> is exposed via
+    /// <see cref="EnvelopeVerificationDownloads.ConsolidatedSignature"/>.
+    /// This endpoint does not require authentication.
+    /// </summary>
+    public async Task<EnvelopeVerificationResponse?> VerifyEnvelopeAsync(
+        string envelopeId,
+        TimeSpan? timeout = null,
+        CancellationToken ct = default)
+    {
+        return await _client.RequestNoAuthAsync<EnvelopeVerificationResponse>(
+            HttpMethod.Get,
+            $"/v1/verify/envelope/{envelopeId}",
+            timeout: timeout,
+            ct: ct).ConfigureAwait(false);
+    }
 }
