@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.2.0] - 2026-04-14
+
+### Added
+
+- `client.Verification.VerifyEnvelopeAsync(envelopeId)` — public async method for the new `GET /v1/verify/envelope/{envelopeId}` endpoint. Returns envelope status, signers list (each with `EvidenceId` for drill-down via `VerifyAsync()`), and consolidated download URLs.
+- `EnvelopeVerificationResponse`, `EnvelopeVerificationSigner`, and `EnvelopeVerificationDownloads` records. For non-PDF envelopes signed with digital certificates, `Downloads.ConsolidatedSignature` exposes a single PKCS#7 / CMS detached `.p7s` containing every signer's `SignerInfo`. For PDF envelopes, `Downloads.CombinedSignedPdf` exposes the merged PDF.
+- `VerificationSigner.CpfCnpj` and `VerificationResponse.TenantCnpj` fields (previously returned by the API but not modeled by the SDK).
+- `Downloads.OriginalDocument` and `Downloads.SignedSignature` fields on `VerificationDownloadsResponse` (previously undocumented), matching the real shape the API returns.
+
+### Changed
+
+- `Downloads.SignedSignature` is now `null` when the evidence belongs to a multi-signer envelope (the API omits the field). For standalone signing sessions (single-signer non-PDF with digital certificate) the field is still populated. To retrieve the consolidated `.p7s` for an envelope, use `client.Verification.VerifyEnvelopeAsync()` instead.
+
+### Removed
+
+- `Downloads.SignedPdf` — the field was modeled by the SDK but never actually returned by the API. No real-world consumer could have depended on it.
+
 ## [1.1.0] - 2026-03-27
 
 ### Added
