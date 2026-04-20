@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using SignDocsBrasil.Api.Internal;
 using SignDocsBrasil.Api.Resources;
+using SignDocsBrasil.Api.TokenCache;
 
 namespace SignDocsBrasil.Api;
 
@@ -55,19 +56,22 @@ public sealed class SignDocsBrasilClient : IDisposable
         options.Validate();
 
         _auth = new AuthHandler(
-            options.ClientId!,
-            options.ClientSecret,
-            options.PrivateKey,
-            options.Kid,
-            options.TokenUrl,
-            options.Scopes);
+            clientId: options.ClientId!,
+            clientSecret: options.ClientSecret,
+            privateKeyPem: options.PrivateKey,
+            kid: options.Kid,
+            tokenUrl: options.TokenUrl,
+            scopes: options.Scopes,
+            cache: options.TokenCache,
+            baseUrl: options.BaseUrl);
         _http = new SignDocsHttpClient(
             options.HttpClient,
             options.BaseUrl,
             options.Timeout,
             _auth,
             options.MaxRetries,
-            options.Logger);
+            options.Logger,
+            options.OnResponse);
 
         Health = new HealthResource(_http);
         Transactions = new TransactionsResource(_http);
@@ -171,6 +175,26 @@ public sealed class SignDocsBrasilClient : IDisposable
         public Builder Logger(ILogger logger)
         {
             _options.Logger = logger;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets a custom <see cref="ITokenCache"/>. Defaults to an in-process
+        /// <see cref="InMemoryTokenCache"/>.
+        /// </summary>
+        public Builder TokenCache(ITokenCache tokenCache)
+        {
+            _options.TokenCache = tokenCache ?? throw new ArgumentNullException(nameof(tokenCache));
+            return this;
+        }
+
+        /// <summary>
+        /// Registers an observer invoked once per API response with rate-limit,
+        /// deprecation, and request-ID metadata. Callback exceptions are swallowed.
+        /// </summary>
+        public Builder OnResponse(Action<ResponseMetadata> onResponse)
+        {
+            _options.OnResponse = onResponse ?? throw new ArgumentNullException(nameof(onResponse));
             return this;
         }
 

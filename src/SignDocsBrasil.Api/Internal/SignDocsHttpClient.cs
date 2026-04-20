@@ -17,7 +17,7 @@ namespace SignDocsBrasil.Api.Internal;
 /// </summary>
 internal sealed class SignDocsHttpClient : IDisposable
 {
-    internal const string SdkVersion = "1.0.0";
+    internal const string SdkVersion = "1.3.0";
     internal const string UserAgent = "signdocs-brasil-dotnet/" + SdkVersion;
 
     private readonly HttpClient _httpClient;
@@ -27,6 +27,7 @@ internal sealed class SignDocsHttpClient : IDisposable
     private readonly AuthHandler _auth;
     private readonly int _maxRetries;
     private readonly ILogger _logger;
+    private readonly Action<ResponseMetadata>? _onResponse;
 
     internal static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -46,13 +47,19 @@ internal sealed class SignDocsHttpClient : IDisposable
     /// <param name="auth">The authentication handler for acquiring Bearer tokens.</param>
     /// <param name="maxRetries">Maximum number of retry attempts for retryable errors.</param>
     /// <param name="logger">Logger instance, or <c>null</c> for no logging.</param>
+    /// <param name="onResponse">
+    /// Optional observer invoked once per response with parsed rate-limit /
+    /// deprecation / request-ID metadata. Callback exceptions are caught and
+    /// logged; they never fail the surrounding request.
+    /// </param>
     internal SignDocsHttpClient(
         HttpClient? httpClient,
         string baseUrl,
         TimeSpan timeout,
         AuthHandler auth,
         int maxRetries,
-        ILogger? logger)
+        ILogger? logger,
+        Action<ResponseMetadata>? onResponse = null)
     {
         if (httpClient is not null)
         {
@@ -70,6 +77,7 @@ internal sealed class SignDocsHttpClient : IDisposable
         _auth = auth;
         _maxRetries = maxRetries;
         _logger = logger ?? NullLogger.Instance;
+        _onResponse = onResponse;
     }
 
     /// <summary>
@@ -119,6 +127,8 @@ internal sealed class SignDocsHttpClient : IDisposable
                     _logger.LogInformation("{Method} {Path} -> {Status} ({Duration}ms)",
                         method, path, statusCode, durationMs);
                 }
+
+                InvokeOnResponse(response, method, path);
 
                 // If retryable and not on last attempt, retry with backoff
                 if (RetryPolicy.IsRetryable(statusCode) && attempt < _maxRetries)
@@ -383,6 +393,29 @@ internal sealed class SignDocsHttpClient : IDisposable
         }
 
         return sb.ToString();
+    }
+
+    /// <summary>
+    /// Fire the caller's <c>OnResponse</c> observer, swallowing any exception so
+    /// observability failures can't break API calls. Logs swallowed exceptions
+    /// at debug level if a logger is configured.
+    /// </summary>
+    private void InvokeOnResponse(HttpResponseMessage response, HttpMethod method, string path)
+    {
+        if (_onResponse is null)
+        {
+            return;
+        }
+
+        try
+        {
+            ResponseMetadata metadata = ResponseMetadata.FromResponse(response, method.Method, path);
+            _onResponse(metadata);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "OnResponse callback threw; swallowing");
+        }
     }
 
     public void Dispose()

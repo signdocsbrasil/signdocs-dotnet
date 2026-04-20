@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.3.0] - 2026-04-20
+
+### Added
+
+- `SignDocsBrasil.Api.TokenCache` namespace: `ITokenCache` interface, `CachedToken` record, `InMemoryTokenCache` default implementation (thread-safe via `ConcurrentDictionary`), and `TokenCacheKeys.Derive` helper. Inject via `SignDocsBrasilClientOptions.TokenCache` to share OAuth tokens across processes/pods (Redis, distributed cache). Default preserves pre-1.3 single-process behavior.
+- `SignDocsBrasil.Api.ResponseMetadata` — captures `RateLimit-*`, `Deprecation`, `Sunset`, and `X-Request-Id` / `X-SignDocs-Request-Id` headers from every API response. Register an observer via `SignDocsBrasilClientOptions.OnResponse`. RFC 8594 parser accepts both `@<unix-seconds>` and IMF-fixdate forms.
+- Webhook event names for the NT65 INSS consignado flow:
+  - `STEP.PURPOSE_DISCLOSURE_SENT` — purpose-disclosure notification delivered to the beneficiary
+  - `TRANSACTION.DEADLINE_APPROACHING` — ≤2 business days remaining until the INSS submission deadline
+
+### Changed
+
+- `SignDocsBrasil.Api.Internal.AuthHandler` promoted from `internal sealed` to `public` (non-sealed). Consumers can now inject custom `ITokenCache` implementations without reflection. This is strictly more permissive — no existing consumer breaks.
+- User-Agent bumped to `1.3.0`.
+
 ## [1.2.0] - 2026-04-14
 
 ### Added

@@ -3,75 +3,108 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using SignDocsBrasil.Api.Errors;
+using SignDocsBrasil.Api.TokenCache;
 
 namespace SignDocsBrasil.Api.Internal;
 
 /// <summary>
 /// Handles OAuth2 token acquisition and caching for the SignDocsBrasil API.
 /// Supports both client_secret and private_key_jwt (ES256) authentication modes.
+///
+/// Tokens are cached via a pluggable <see cref="ITokenCache"/>. The default
+/// <see cref="InMemoryTokenCache"/> preserves the pre-1.3 single-process
+/// behavior. Stateless hosts (AWS Lambda, Azure Functions, scale-to-zero
+/// containers) should inject a shared-store cache to avoid fetching a fresh
+/// token on every invocation.
+///
+/// <para>
+/// Public and non-sealed since 1.3.0. Subclassing is supported, but prefer
+/// injecting a custom <see cref="ITokenCache"/> over subclassing for most
+/// use cases. The class lives under the <c>SignDocsBrasil.Api.Internal</c>
+/// namespace for historical reasons; it is part of the public API surface.
+/// </para>
 /// Thread-safe via <see cref="SemaphoreSlim"/>.
 /// </summary>
-internal sealed class AuthHandler : IDisposable
+public class AuthHandler : IDisposable
 {
-    private const long TokenExpiryBufferSeconds = 30;
+    private static readonly TimeSpan TokenExpiryBuffer = TimeSpan.FromSeconds(30);
 
     private readonly string _clientId;
     private readonly string? _clientSecret;
     private readonly string? _privateKeyPem;
     private readonly string? _kid;
     private readonly string _tokenUrl;
+    private readonly string _baseUrl;
+    private readonly IReadOnlyList<string> _scopes;
     private readonly string _scopeString;
     private readonly HttpClient _httpClient;
     private readonly bool _ownsHttpClient;
     private readonly SemaphoreSlim _semaphore = new(1, 1);
-
-    private string? _cachedAccessToken;
-    private DateTimeOffset _cachedExpiresAt;
+    private readonly ITokenCache _cache;
+    private readonly string _cacheKey;
 
     /// <summary>
     /// Creates an AuthHandler from SDK options.
     /// Constructs its own internal <see cref="HttpClient"/> with a 10-second timeout.
     /// </summary>
-    internal AuthHandler(
-        string clientId,
-        string? clientSecret,
-        string? privateKeyPem,
-        string? kid,
-        string tokenUrl,
-        IReadOnlyList<string> scopes)
-    {
-        _clientId = clientId;
-        _clientSecret = clientSecret;
-        _privateKeyPem = privateKeyPem;
-        _kid = kid;
-        _tokenUrl = tokenUrl;
-        _scopeString = string.Join(" ", scopes);
-        _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
-        _ownsHttpClient = true;
-    }
-
-    /// <summary>
-    /// Internal constructor accepting a test <see cref="HttpClient"/> for unit testing.
-    /// The caller retains ownership of the <paramref name="testHttpClient"/>.
-    /// </summary>
-    internal AuthHandler(
+    public AuthHandler(
         string clientId,
         string? clientSecret,
         string? privateKeyPem,
         string? kid,
         string tokenUrl,
         IReadOnlyList<string> scopes,
-        HttpClient testHttpClient)
+        ITokenCache? cache = null,
+        string? baseUrl = null)
     {
         _clientId = clientId;
         _clientSecret = clientSecret;
         _privateKeyPem = privateKeyPem;
         _kid = kid;
         _tokenUrl = tokenUrl;
+        _baseUrl = baseUrl ?? DeriveBaseUrlFromTokenUrl(tokenUrl);
+        _scopes = scopes;
+        _scopeString = string.Join(" ", scopes);
+        _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
+        _ownsHttpClient = true;
+        _cache = cache ?? new InMemoryTokenCache();
+        _cacheKey = TokenCacheKeys.Derive(clientId, _baseUrl, scopes);
+    }
+
+    /// <summary>
+    /// Constructor accepting a test <see cref="HttpClient"/> for unit testing.
+    /// The caller retains ownership of the <paramref name="testHttpClient"/>.
+    /// </summary>
+    public AuthHandler(
+        string clientId,
+        string? clientSecret,
+        string? privateKeyPem,
+        string? kid,
+        string tokenUrl,
+        IReadOnlyList<string> scopes,
+        HttpClient testHttpClient,
+        ITokenCache? cache = null,
+        string? baseUrl = null)
+    {
+        _clientId = clientId;
+        _clientSecret = clientSecret;
+        _privateKeyPem = privateKeyPem;
+        _kid = kid;
+        _tokenUrl = tokenUrl;
+        _baseUrl = baseUrl ?? DeriveBaseUrlFromTokenUrl(tokenUrl);
+        _scopes = scopes;
         _scopeString = string.Join(" ", scopes);
         _httpClient = testHttpClient;
         _ownsHttpClient = false;
+        _cache = cache ?? new InMemoryTokenCache();
+        _cacheKey = TokenCacheKeys.Derive(clientId, _baseUrl, scopes);
     }
+
+    /// <summary>
+    /// The deterministic cache key this handler uses for reads/writes against
+    /// the configured <see cref="ITokenCache"/>.
+    /// </summary>
+    public string CacheKey => _cacheKey;
 
     /// <summary>
     /// Returns a valid access token, fetching a new one if the cached token is expired or absent.
@@ -80,15 +113,15 @@ internal sealed class AuthHandler : IDisposable
     /// <param name="ct">Cancellation token.</param>
     /// <returns>A valid Bearer access token.</returns>
     /// <exception cref="AuthenticationException">Thrown when the token request fails.</exception>
-    internal async Task<string> GetAccessTokenAsync(CancellationToken ct)
+    public async Task<string> GetAccessTokenAsync(CancellationToken ct)
     {
         await _semaphore.WaitAsync(ct).ConfigureAwait(false);
         try
         {
-            if (_cachedAccessToken is not null
-                && DateTimeOffset.UtcNow < _cachedExpiresAt.AddSeconds(-TokenExpiryBufferSeconds))
+            CachedToken? cached = _cache.Get(_cacheKey);
+            if (cached is not null && !cached.IsExpired(DateTimeOffset.UtcNow, TokenExpiryBuffer))
             {
-                return _cachedAccessToken;
+                return cached.AccessToken;
             }
 
             return await FetchTokenAsync(ct).ConfigureAwait(false);
@@ -97,6 +130,16 @@ internal sealed class AuthHandler : IDisposable
         {
             _semaphore.Release();
         }
+    }
+
+    /// <summary>
+    /// Invalidate the cached token so that the next call to
+    /// <see cref="GetAccessTokenAsync"/> will fetch a fresh token from the
+    /// authorization server.
+    /// </summary>
+    public void Invalidate()
+    {
+        _cache.Delete(_cacheKey);
     }
 
     private async Task<string> FetchTokenAsync(CancellationToken ct)
@@ -147,8 +190,11 @@ internal sealed class AuthHandler : IDisposable
                 ?? throw new AuthenticationException("Token response missing access_token");
             long expiresIn = root.GetProperty("expires_in").GetInt64();
 
-            _cachedAccessToken = accessToken;
-            _cachedExpiresAt = DateTimeOffset.UtcNow.AddSeconds(expiresIn);
+            var token = new CachedToken(
+                AccessToken: accessToken,
+                ExpiresAt: DateTimeOffset.UtcNow.AddSeconds(expiresIn));
+
+            _cache.Set(_cacheKey, token);
 
             return accessToken;
         }
@@ -173,7 +219,6 @@ internal sealed class AuthHandler : IDisposable
     {
         long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
-        // Build JWT header
         var header = new JsonObject
         {
             ["alg"] = "ES256",
@@ -181,7 +226,6 @@ internal sealed class AuthHandler : IDisposable
             ["kid"] = _kid
         };
 
-        // Build JWT payload
         var payload = new JsonObject
         {
             ["iss"] = _clientId,
@@ -196,7 +240,6 @@ internal sealed class AuthHandler : IDisposable
         string encodedPayload = Base64UrlEncode(Encoding.UTF8.GetBytes(payload.ToJsonString()));
         string signingInput = $"{encodedHeader}.{encodedPayload}";
 
-        // Sign with ES256 (ECDSA using P-256 and SHA-256)
         using ECDsa ecdsa = ECDsa.Create();
         ecdsa.ImportPkcs8PrivateKey(ParsePemKey(_privateKeyPem!), out _);
 
@@ -238,6 +281,27 @@ internal sealed class AuthHandler : IDisposable
             .TrimEnd('=');
     }
 
+    /// <summary>
+    /// Fallback base-URL derivation when only the token URL was supplied.
+    /// Strips <c>/oauth2/token</c> if present, otherwise uses the scheme+host.
+    /// </summary>
+    private static string DeriveBaseUrlFromTokenUrl(string tokenUrl)
+    {
+        const string suffix = "/oauth2/token";
+        if (tokenUrl.EndsWith(suffix, StringComparison.Ordinal))
+        {
+            return tokenUrl[..^suffix.Length];
+        }
+
+        if (Uri.TryCreate(tokenUrl, UriKind.Absolute, out Uri? uri))
+        {
+            return $"{uri.Scheme}://{uri.Authority}";
+        }
+
+        return tokenUrl;
+    }
+
+    /// <inheritdoc />
     public void Dispose()
     {
         if (_ownsHttpClient)
@@ -246,5 +310,6 @@ internal sealed class AuthHandler : IDisposable
         }
 
         _semaphore.Dispose();
+        GC.SuppressFinalize(this);
     }
 }
