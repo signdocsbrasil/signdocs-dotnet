@@ -157,7 +157,7 @@ public class ResourcesTests : IDisposable
     public async Task Webhooks_List_ReturnsListOfWebhooks()
     {
         _handler.EnqueueToken();
-        _handler.EnqueueJson(200, """[{"webhookId":"wh-001","url":"https://ex.com","events":["TRANSACTION.COMPLETED"],"status":"ACTIVE","createdAt":"2024-01-01T00:00:00Z"}]""");
+        _handler.EnqueueJson(200, """{"webhooks":[{"webhookId":"wh-001","url":"https://ex.com","events":["TRANSACTION.COMPLETED"],"status":"ACTIVE","createdAt":"2024-01-01T00:00:00Z"}],"count":1}""");
 
         var resource = new WebhooksResource(_client);
         List<Webhook>? result = await resource.ListAsync();

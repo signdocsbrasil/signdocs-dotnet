@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using SignDocsBrasil.Api.Internal;
 using SignDocsBrasil.Api.Models;
 
@@ -8,6 +9,14 @@ public sealed class WebhooksResource
     private readonly SignDocsHttpClient _client;
 
     internal WebhooksResource(SignDocsHttpClient client) => _client = client;
+
+    // GET /v1/webhooks returns { "webhooks": [...], "count": N }.
+    // Internal DTO used for deserialization; consumers see a List<Webhook>.
+    private sealed class WebhookListEnvelope
+    {
+        [JsonPropertyName("webhooks")] public List<Webhook>? Webhooks { get; set; }
+        [JsonPropertyName("count")] public int Count { get; set; }
+    }
 
     public async Task<RegisterWebhookResponse?> RegisterAsync(
         RegisterWebhookRequest request,
@@ -28,11 +37,12 @@ public sealed class WebhooksResource
         TimeSpan? timeout = null,
         CancellationToken ct = default)
     {
-        return await _client.RequestAsync<List<Webhook>>(
+        var envelope = await _client.RequestAsync<WebhookListEnvelope>(
             HttpMethod.Get,
             "/v1/webhooks",
             timeout: timeout,
             ct: ct).ConfigureAwait(false);
+        return envelope?.Webhooks ?? new List<Webhook>();
     }
 
     public async Task DeleteAsync(

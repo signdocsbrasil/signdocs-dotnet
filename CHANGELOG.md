@@ -2,6 +2,10 @@
 
 ## [1.3.0] - 2026-04-20
 
+### Fixed
+
+- `WebhooksResource.ListAsync()` now correctly returns `List<Webhook>`. Previously `System.Text.Json` failed to deserialize the API's `{"webhooks":[...],"count":N}` envelope into `List<Webhook>` (array vs. object mismatch). The method now deserializes into an internal `WebhookListEnvelope` DTO and returns its inner list.
+
 ### Added
 
 - `SignDocsBrasil.Api.TokenCache` namespace: `ITokenCache` interface, `CachedToken` record, `InMemoryTokenCache` default implementation (thread-safe via `ConcurrentDictionary`), and `TokenCacheKeys.Derive` helper. Inject via `SignDocsBrasilClientOptions.TokenCache` to share OAuth tokens across processes/pods (Redis, distributed cache). Default preserves pre-1.3 single-process behavior.
