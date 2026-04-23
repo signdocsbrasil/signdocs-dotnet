@@ -411,15 +411,15 @@ public class SignDocsHttpClientTests : IDisposable
     }
 
     [Fact]
-    public void SdkVersion_Is1_3_0()
+    public void SdkVersion_Is1_4_0()
     {
-        Assert.Equal("1.3.0", SignDocsHttpClient.SdkVersion);
+        Assert.Equal("1.4.0", SignDocsHttpClient.SdkVersion);
     }
 
     [Fact]
     public void UserAgent_ContainsVersion()
     {
-        Assert.Equal("signdocs-brasil-dotnet/1.3.0", SignDocsHttpClient.UserAgent);
+        Assert.Equal("signdocs-brasil-dotnet/1.4.0", SignDocsHttpClient.UserAgent);
     }
 
     [Fact]

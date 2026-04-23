@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.4.0] - 2026-04-23
+
+### Fixed (BREAKING IF YOU SOMEHOW USED 1.x SUCCESSFULLY)
+
+- **Realigned every signing-session and envelope model class to match the actual API schema.** Releases 1.0.0 through 1.3.0 shipped with hand-written models that didn't match what the server validates: `CreateSigningSessionRequest` used legacy fields (`Name`, `Type`, `Signers[]`, `Documents[]`, `CallbackUrl`, `RedirectUrl`, `BrandingId`) that the API has never accepted, so any call would have returned 400 Bad Request. The TypeScript / Python / Go SDKs already used the correct shape; this brings .NET into alignment.
+- Affected classes: `CreateSigningSessionRequest`, `SigningSession`, `SigningSessionStatus`, `CreateEnvelopeRequest`, `AddEnvelopeSessionRequest`, `EnvelopeSession`. The new shape uses `Purpose`, `Policy`, `Signer`, `Document`, `ReturnUrl`, `CancelUrl`, `Metadata`, `Locale`, `ExpiresInMinutes`, `Appearance` — matching the OpenAPI spec.
+- `Policy` and `Signer` (top-level models) were already correct and are reused unchanged. `Envelope`, `EnvelopeSessionSummary`, `EnvelopeDetail` were already correct and are unchanged.
+
+### Added
+
+- `Owner` model — optional requester identity (`Email`, `Name`) on `CreateSigningSessionRequest` and `CreateEnvelopeRequest`. When provided, SignDocs automatically emails each signer an invitation with their signing URL (when `Signer.Email` differs from `Owner.Email`, case-insensitive) and emails the owner a completion notification per signer completion (plus a final "all signed" message for envelopes). Omit to keep the traditional behavior.
+- `InviteSent` (`bool?`) on `SigningSession` and `EnvelopeSession` response models. Populated by the API when an invitation email was dispatched.
+
+### Changed
+
+- `User-Agent` bumped to `signdocs-brasil-dotnet/1.4.0`.
+
 ## [1.3.0] - 2026-04-20
 
 ### Fixed

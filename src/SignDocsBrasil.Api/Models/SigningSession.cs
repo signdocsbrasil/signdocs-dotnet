@@ -2,43 +2,32 @@ using System.Text.Json.Serialization;
 
 namespace SignDocsBrasil.Api.Models;
 
+/// <summary>
+/// A signing session returned by the API when created.
+/// </summary>
+/// <param name="SessionId">Unique identifier of the session.</param>
+/// <param name="TransactionId">Identifier of the underlying transaction.</param>
+/// <param name="Status">Session status: ACTIVE, COMPLETED, CANCELLED, EXPIRED, FAILED.</param>
+/// <param name="Url">URL of the hosted signing page.</param>
+/// <param name="ClientSecret">
+/// Session token for widget / redirect authentication.
+/// Format: <c>ss_secret_</c> followed by a JWT.
+/// </param>
+/// <param name="ExpiresAt">Session expiration timestamp (ISO 8601 UTC).</param>
+/// <param name="CreatedAt">Session creation timestamp (ISO 8601 UTC).</param>
+/// <param name="InviteSent">
+/// <c>true</c> when SignDocs dispatched an invitation email to
+/// <c>signer.email</c> at session creation. Populated only when
+/// <c>owner</c> was provided and <c>signer.email</c> differs from
+/// <c>owner.email</c>.
+/// </param>
 public record SigningSession(
     [property: JsonPropertyName("sessionId")] string? SessionId,
-    [property: JsonPropertyName("tenantId")] string? TenantId,
-    [property: JsonPropertyName("name")] string? Name,
-    [property: JsonPropertyName("type")] string? Type,
+    [property: JsonPropertyName("transactionId")] string? TransactionId,
     [property: JsonPropertyName("status")] string? Status,
-    [property: JsonPropertyName("signers")] List<SigningSession.SigningSessionSigner>? Signers,
-    [property: JsonPropertyName("documents")] List<SigningSession.SigningSessionDocument>? Documents,
-    [property: JsonPropertyName("callbackUrl")] string? CallbackUrl,
-    [property: JsonPropertyName("redirectUrl")] string? RedirectUrl,
-    [property: JsonPropertyName("sessionUrl")] string? SessionUrl,
-    [property: JsonPropertyName("metadata")] Dictionary<string, string>? Metadata,
-    [property: JsonPropertyName("locale")] string? Locale,
-    [property: JsonPropertyName("brandingId")] string? BrandingId,
+    [property: JsonPropertyName("url")] string? Url,
+    [property: JsonPropertyName("clientSecret")] string? ClientSecret,
     [property: JsonPropertyName("expiresAt")] string? ExpiresAt,
     [property: JsonPropertyName("createdAt")] string? CreatedAt,
-    [property: JsonPropertyName("updatedAt")] string? UpdatedAt
-)
-{
-    public record SigningSessionSigner(
-        [property: JsonPropertyName("signerId")] string? SignerId,
-        [property: JsonPropertyName("name")] string? Name,
-        [property: JsonPropertyName("email")] string? Email,
-        [property: JsonPropertyName("cpf")] string? Cpf,
-        [property: JsonPropertyName("phone")] string? Phone,
-        [property: JsonPropertyName("role")] string? Role,
-        [property: JsonPropertyName("order")] int? Order,
-        [property: JsonPropertyName("status")] string? Status,
-        [property: JsonPropertyName("signedAt")] string? SignedAt,
-        [property: JsonPropertyName("signerUrl")] string? SignerUrl
-    );
-
-    public record SigningSessionDocument(
-        [property: JsonPropertyName("documentId")] string? DocumentId,
-        [property: JsonPropertyName("name")] string? Name,
-        [property: JsonPropertyName("contentType")] string? ContentType,
-        [property: JsonPropertyName("externalId")] string? ExternalId,
-        [property: JsonPropertyName("status")] string? Status
-    );
-}
+    [property: JsonPropertyName("inviteSent")] bool? InviteSent = null
+);
