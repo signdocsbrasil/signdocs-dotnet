@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.5.0] - 2026-04-27
+
+### Added
+
+- `EnvelopeId` property on the `VerificationResponse` record — populated when the verified evidence belongs to a multi-signer envelope. Use it with `client.Verification.VerifyEnvelopeAsync(envelopeId)` for cross-signer drill-down.
+- Three new `WebhookEvent` enum members:
+  - `EnvelopeCreated` (`ENVELOPE.CREATED`)
+  - `EnvelopeAllSigned` (`ENVELOPE.ALL_SIGNED`)
+  - `EnvelopeExpired` (`ENVELOPE.EXPIRED`)
+
+### Changed
+
+- `User-Agent` bumped to `signdocs-brasil-dotnet/1.5.0`.
+
 ## [1.4.1] - 2026-04-27
 
 ### Fixed

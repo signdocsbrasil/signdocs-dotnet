@@ -4,7 +4,7 @@ namespace SignDocsBrasil.Api.Tests;
 
 public class WebhookEventTests
 {
-    // Canonical 17 events from openapi/openapi.yaml WebhookEventType enum
+    // Canonical events from openapi/openapi.yaml WebhookEventType enum
     private static readonly string[] ExpectedWireValues =
     {
         "TRANSACTION.CREATED",
@@ -24,13 +24,16 @@ public class WebhookEventTests
         "SIGNING_SESSION.COMPLETED",
         "SIGNING_SESSION.CANCELLED",
         "SIGNING_SESSION.EXPIRED",
+        "ENVELOPE.CREATED",
+        "ENVELOPE.ALL_SIGNED",
+        "ENVELOPE.EXPIRED",
     };
 
     [Fact]
-    public void WebhookEvent_HasAll17CanonicalEvents()
+    public void WebhookEvent_HasAllCanonicalEvents()
     {
         Array values = Enum.GetValues(typeof(WebhookEvent));
-        Assert.Equal(17, values.Length);
+        Assert.Equal(20, values.Length);
     }
 
     [Fact]

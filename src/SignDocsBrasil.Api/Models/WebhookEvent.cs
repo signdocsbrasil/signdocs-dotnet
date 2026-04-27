@@ -65,6 +65,15 @@ public enum WebhookEvent
 
     [EnumMember(Value = "SIGNING_SESSION.EXPIRED")]
     SigningSessionExpired,
+
+    [EnumMember(Value = "ENVELOPE.CREATED")]
+    EnvelopeCreated,
+
+    [EnumMember(Value = "ENVELOPE.ALL_SIGNED")]
+    EnvelopeAllSigned,
+
+    [EnumMember(Value = "ENVELOPE.EXPIRED")]
+    EnvelopeExpired,
 }
 
 /// <summary>

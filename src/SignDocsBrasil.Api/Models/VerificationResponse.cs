@@ -5,6 +5,7 @@ namespace SignDocsBrasil.Api.Models;
 public record VerificationResponse(
     [property: JsonPropertyName("evidenceId")] string? EvidenceId,
     [property: JsonPropertyName("transactionId")] string? TransactionId,
+    [property: JsonPropertyName("envelopeId")] string? EnvelopeId,
     [property: JsonPropertyName("status")] string? Status,
     [property: JsonPropertyName("purpose")] string? Purpose,
     [property: JsonPropertyName("documentHash")] string? DocumentHash,
