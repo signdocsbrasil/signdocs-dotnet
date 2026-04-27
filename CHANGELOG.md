@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.4.1] - 2026-04-27
+
+### Fixed
+
+- `WebhookTestResponse` shape — was `{deliveryId, status, statusCode}`, now matches the API spec `{webhookId, testDelivery: {httpStatus, success, error?, timestamp}}`. The typed wrapper for `client.Webhooks.TestAsync()` was returning all-empty fields against the live HML API; consumers will now see the real delivery result. New nested record `WebhookTestDelivery` exposes `HttpStatus`, `Success`, `Timestamp`, and nullable `Error`.
+
+### Changed
+
+- User-Agent bumped to `signdocs-brasil-dotnet/1.4.1`.
+
 ## [1.4.0] - 2026-04-23
 
 ### Fixed (BREAKING IF YOU SOMEHOW USED 1.x SUCCESSFULLY)

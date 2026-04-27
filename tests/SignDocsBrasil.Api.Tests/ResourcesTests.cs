@@ -171,14 +171,34 @@ public class ResourcesTests : IDisposable
     public async Task Webhooks_Test_ReturnsTestResponse()
     {
         _handler.EnqueueToken();
-        _handler.EnqueueJson(200, """{"deliveryId":"dlv-001","status":"DELIVERED","statusCode":200}""");
+        _handler.EnqueueJson(200, """{"webhookId":"wh-uuid-001","testDelivery":{"httpStatus":200,"success":true,"timestamp":"2026-04-27T01:23:28.323Z"}}""");
 
         var resource = new WebhooksResource(_client);
         WebhookTestResponse? result = await resource.TestAsync("wh-uuid-001");
 
         Assert.NotNull(result);
-        Assert.Equal("dlv-001", result!.DeliveryId);
-        Assert.Equal(200, result.StatusCode);
+        Assert.Equal("wh-uuid-001", result!.WebhookId);
+        Assert.NotNull(result.TestDelivery);
+        Assert.Equal(200, result.TestDelivery.HttpStatus);
+        Assert.True(result.TestDelivery.Success);
+        Assert.Equal("2026-04-27T01:23:28.323Z", result.TestDelivery.Timestamp);
+        Assert.Null(result.TestDelivery.Error);
+    }
+
+    [Fact]
+    public async Task Webhooks_Test_RoundTripsErrorField()
+    {
+        _handler.EnqueueToken();
+        _handler.EnqueueJson(200, """{"webhookId":"wh-uuid-002","testDelivery":{"httpStatus":502,"success":false,"error":"Bad Gateway","timestamp":"2026-04-27T01:23:28.323Z"}}""");
+
+        var resource = new WebhooksResource(_client);
+        WebhookTestResponse? result = await resource.TestAsync("wh-uuid-002");
+
+        Assert.NotNull(result);
+        Assert.Equal("wh-uuid-002", result!.WebhookId);
+        Assert.Equal(502, result.TestDelivery.HttpStatus);
+        Assert.False(result.TestDelivery.Success);
+        Assert.Equal("Bad Gateway", result.TestDelivery.Error);
     }
 
     // --- Users ---
