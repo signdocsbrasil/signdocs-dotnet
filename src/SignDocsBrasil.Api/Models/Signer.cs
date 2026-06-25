@@ -30,4 +30,7 @@ public class Signer
 
     [JsonPropertyName("otpChannel")]
     public string? OtpChannel { get; set; }
+
+    [JsonPropertyName("otpChannelSelectable")]
+    public bool? OtpChannelSelectable { get; set; }
 }

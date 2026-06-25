@@ -5,6 +5,7 @@ namespace SignDocsBrasil.Api.Models;
 public record AdvanceSessionRequest(
     [property: JsonPropertyName("action")] string Action,
     [property: JsonPropertyName("otpCode")] string? OtpCode = null,
+    [property: JsonPropertyName("otpChannel")] string? OtpChannel = null,
     [property: JsonPropertyName("livenessSessionId")] string? LivenessSessionId = null,
     [property: JsonPropertyName("certificateChainPems")] List<string>? CertificateChainPems = null,
     [property: JsonPropertyName("signatureRequestId")] string? SignatureRequestId = null,

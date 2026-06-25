@@ -21,7 +21,9 @@ public record SigningSessionBootstrap(
     public record BootstrapSignerData(
         [property: JsonPropertyName("name")] string? Name,
         [property: JsonPropertyName("maskedEmail")] string? MaskedEmail = null,
-        [property: JsonPropertyName("maskedCpf")] string? MaskedCpf = null
+        [property: JsonPropertyName("maskedCpf")] string? MaskedCpf = null,
+        [property: JsonPropertyName("availableOtpChannels")] List<string>? AvailableOtpChannels = null,
+        [property: JsonPropertyName("otpChannelSelectable")] bool? OtpChannelSelectable = null
     );
 
     public record BootstrapStepData(

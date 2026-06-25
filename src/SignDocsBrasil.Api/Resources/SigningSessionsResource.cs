@@ -110,6 +110,24 @@ public sealed class SigningSessionsResource
     }
 
     /// <summary>
+    /// Resends the OTP challenge for a signing session, optionally selecting
+    /// the delivery channel (e.g. "sms", "email", "whatsapp").
+    /// </summary>
+    public async Task<AdvanceSessionResponse?> ResendOtpAsync(
+        string sessionId,
+        ResendOtpRequest request,
+        TimeSpan? timeout = null,
+        CancellationToken ct = default)
+    {
+        return await _client.RequestAsync<AdvanceSessionResponse>(
+            HttpMethod.Post,
+            $"/v1/signing-sessions/{sessionId}/resend-otp",
+            body: request,
+            timeout: timeout,
+            ct: ct).ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// Lists signing sessions with optional filters and pagination.
     /// </summary>
     public async Task<SigningSessionListResponse?> ListAsync(
