@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.6.0] - 2026-06-25
+
+### Added
+
+- `client.Verification.VerifyDocumentAsync(request)` — async method for the new `POST /v1/verify/document` endpoint. Inspects an arbitrary PDF (base64-encoded in `VerifyDocumentRequest.Content`, optional `Filename`) for embedded signatures and reports whether the document is signed, how many signatures were found, and a per-signature breakdown. Unlike the other verification methods this endpoint is **authenticated** (sends a Bearer token, requires the `verification:write` scope) and is available with **production credentials only**.
+- `VerifyDocumentRequest`, `VerifyDocumentResponse`, and `DetectedSignature` models. Each `DetectedSignature` exposes `Method`, `Type` (one of `"pades"`, `"pkcs7"`, `"legacy"`, `"digital_certificate"`), `Confidence`, and the optional `SubFilter` / `Filter` PDF dictionary values.
+- `Verification.verifyDocument` in the idiomatic F# wrapper, mirroring `Verification.verify` / `Verification.downloads`.
+
+### Changed
+
+- `User-Agent` bumped to `signdocs-brasil-dotnet/1.6.0` (the internal `SdkVersion` constant had drifted at `1.5.0` while the package shipped as `1.5.1`; both are now aligned to `1.6.0`).
+
 ## [1.5.0] - 2026-04-27
 
 ### Added

@@ -94,6 +94,9 @@ let ``Verification module functions return correct types`` () =
     let _downloads: string -> SignDocsBrasil.Api.SignDocsBrasilClient -> Async<Result<SignDocsBrasil.Api.Models.VerificationDownloadsResponse, SignDocsError>> =
         Verification.downloads
 
+    let _verifyDocument: SignDocsBrasil.Api.Models.VerifyDocumentRequest -> SignDocsBrasil.Api.SignDocsBrasilClient -> Async<Result<SignDocsBrasil.Api.Models.VerifyDocumentResponse, SignDocsError>> =
+        Verification.verifyDocument
+
     Assert.True(true)
 
 /// Verifies that Users module functions have the correct return type shape.

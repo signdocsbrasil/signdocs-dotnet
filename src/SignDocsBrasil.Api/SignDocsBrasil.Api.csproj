@@ -8,7 +8,7 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
     <PackageId>SignDocsBrasil.Api</PackageId>
-    <Version>1.5.1</Version>
+    <Version>1.6.0</Version>
     <Authors>SignDocsBrasil</Authors>
     <Description>SDK oficial em .NET para a API SignDocsBrasil</Description>
     <PackageTags>signdocs;brasil;api;sdk;signing;biometrics</PackageTags>

@@ -53,4 +53,30 @@ public sealed class VerificationResource
             timeout: timeout,
             ct: ct).ConfigureAwait(false);
     }
+
+    /// <summary>
+    /// Inspects an arbitrary PDF for embedded signatures (PAdES, PKCS#7, legacy,
+    /// or ICP-Brasil digital certificate) and reports what was detected. Unlike
+    /// the other verification methods, this endpoint is <strong>authenticated</strong>:
+    /// a Bearer token is sent and the <c>verification:write</c> scope is required.
+    /// It is available with <strong>production credentials only</strong>.
+    /// </summary>
+    /// <param name="request">
+    /// The document to inspect; <see cref="VerifyDocumentRequest.Content"/> must be
+    /// the base64-encoded PDF.
+    /// </param>
+    /// <param name="timeout">Optional per-request timeout override.</param>
+    /// <param name="ct">Cancellation token.</param>
+    public async Task<VerifyDocumentResponse?> VerifyDocumentAsync(
+        VerifyDocumentRequest request,
+        TimeSpan? timeout = null,
+        CancellationToken ct = default)
+    {
+        return await _client.RequestAsync<VerifyDocumentResponse>(
+            HttpMethod.Post,
+            "/v1/verify/document",
+            body: request,
+            timeout: timeout,
+            ct: ct).ConfigureAwait(false);
+    }
 }

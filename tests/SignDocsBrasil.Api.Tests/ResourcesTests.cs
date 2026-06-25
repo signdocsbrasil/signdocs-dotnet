@@ -297,6 +297,51 @@ public class ResourcesTests : IDisposable
         Assert.Equal("CLICK_ACCEPT", result.Steps![0].Type);
     }
 
+    [Fact]
+    public async Task Verification_VerifyDocument_ReturnsResponse()
+    {
+        _handler.EnqueueToken();
+        string body = FixtureLoader.LoadResponseBody("verification-document.json");
+        _handler.EnqueueJson(200, body);
+
+        var resource = new VerificationResource(_client);
+        var request = new VerifyDocumentRequest
+        {
+            Content = "JVBERi0xLjQK...",
+            Filename = "contract.pdf"
+        };
+
+        VerifyDocumentResponse? result = await resource.VerifyDocumentAsync(request);
+
+        Assert.NotNull(result);
+        Assert.True(result!.Signed);
+        Assert.Equal(1, result.SignatureCount);
+        Assert.NotNull(result.Signatures);
+        Assert.Single(result.Signatures!);
+        Assert.Equal("pkcs7", result.Signatures![0].Type);
+        Assert.Equal("adbe.pkcs7.detached", result.Signatures[0].SubFilter);
+        Assert.Equal(1.0, result.Signatures[0].Confidence);
+        Assert.Equal("2024-11-15T00:01:00.000Z", result.CheckedAt);
+    }
+
+    [Fact]
+    public async Task Verification_VerifyDocument_UsesAuthenticatedPost()
+    {
+        _handler.EnqueueToken();
+        string body = FixtureLoader.LoadResponseBody("verification-document.json");
+        _handler.EnqueueJson(200, body);
+
+        var resource = new VerificationResource(_client);
+        await resource.VerifyDocumentAsync(new VerifyDocumentRequest { Content = "JVBERi0xLjQK..." });
+
+        // First request is the token exchange, second is the API call (authenticated).
+        Assert.Equal(2, _handler.Requests.Count);
+        HttpRequestMessage apiRequest = _handler.Requests[1];
+        Assert.Equal(HttpMethod.Post, apiRequest.Method);
+        Assert.EndsWith("/v1/verify/document", apiRequest.RequestUri!.ToString());
+        Assert.True(apiRequest.Headers.Contains("Authorization"));
+    }
+
     // --- Evidence ---
 
     [Fact]
