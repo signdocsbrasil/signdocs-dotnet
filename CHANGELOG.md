@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.6.1] - 2026-06-25
+
+### Changed
+
+- API-documentation link in README/package metadata now points to https://docs.signdocs.com.br (was a dead relative path).
+
 ## [1.6.0] - 2026-06-25
 
 ### Added
