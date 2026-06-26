@@ -14,6 +14,7 @@
     <PackageTags>signdocs;brasil;api;sdk;signing;biometrics</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/signdocsbrasil/signdocs-dotnet</RepositoryUrl>
+    <PackageProjectUrl>https://docs.signdocs.com.br</PackageProjectUrl>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>CS1591;CS1574</NoWarn>
     <PackageReadmeFile>README.md</PackageReadmeFile>

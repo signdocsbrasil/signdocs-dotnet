@@ -321,6 +321,10 @@ using var client = SignDocsBrasilClient.CreateBuilder()
     .Build();
 ```
 
+## Documentation
+
+Full integration guides and the API reference are at [docs.signdocs.com.br](https://docs.signdocs.com.br).
+
 ## License
 
 MIT
