@@ -62,6 +62,48 @@ public sealed class EnvelopesResource
     }
 
     /// <summary>
+    /// Cancels an entire envelope.
+    /// </summary>
+    /// <remarks>
+    /// Transitions every non-terminal session and its transaction to CANCELLED and
+    /// marks the envelope CANCELLED, killing the pending signing links. Signatures
+    /// already collected are preserved and reported as PreservedSignedCount.
+    /// <para>
+    /// Prefer this over cancelling each session individually: it is one call, it
+    /// records the cancellation as a single auditable terminal event, and it is the
+    /// only way to move the envelope's own status. Cancelling the member sessions
+    /// one by one leaves the envelope itself ACTIVE.
+    /// </para>
+    /// <para>
+    /// Idempotent: re-cancelling returns CancelledCount 0 and AlreadyCancelled true.
+    /// </para>
+    /// </remarks>
+    /// <param name="envelopeId">The envelope identifier.</param>
+    /// <param name="reason">
+    /// Free-text reason recorded in the audit trail. Null lets the API default it
+    /// to <c>envelope_cancelled</c>.
+    /// </param>
+    /// <param name="timeout">Optional per-request timeout.</param>
+    /// <param name="ct">Cancellation token.</param>
+    public async Task<CancelEnvelopeResponse?> CancelAsync(
+        string envelopeId,
+        string? reason = null,
+        TimeSpan? timeout = null,
+        CancellationToken ct = default)
+    {
+        var body = string.IsNullOrEmpty(reason)
+            ? new Dictionary<string, string>()
+            : new Dictionary<string, string> { ["reason"] = reason! };
+
+        return await _client.RequestAsync<CancelEnvelopeResponse>(
+            HttpMethod.Post,
+            $"/v1/envelopes/{envelopeId}/cancel",
+            body: body,
+            timeout: timeout,
+            ct: ct).ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// Generates a combined stamp PDF for a completed envelope with all signer evidence.
     /// </summary>
     public async Task<EnvelopeCombinedStampResponse?> CombinedStampAsync(
