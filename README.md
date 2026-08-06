@@ -306,7 +306,7 @@ Request specific OAuth2 scopes:
 using var client = SignDocsBrasilClient.CreateBuilder()
     .ClientId("your-client-id")
     .ClientSecret("your-client-secret")
-    .Scopes("transactions:read", "transactions:write", "documents:write")
+    .Scopes("transactions:read", "transactions:write", "steps:write")
     .Build();
 ```
 
