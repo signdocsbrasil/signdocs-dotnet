@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Net;
 using System.Text;
 using System.Text.Json;
@@ -411,15 +412,24 @@ public class SignDocsHttpClientTests : IDisposable
     }
 
     [Fact]
-    public void SdkVersion_Is1_6_1()
+    public void SdkVersion_MatchesPackageVersion()
     {
-        Assert.Equal("1.8.0", SignDocsHttpClient.SdkVersion);
+        // The User-Agent is how the API attributes traffic to a client version.
+        // Pinning this to a literal is what let the constant sit at 1.6.1, then
+        // 1.8.0, while the package shipped 1.9.0 — every request reporting a
+        // version nobody was running. Compare against the package instead, so a
+        // release that forgets the constant fails here.
+        string packageVersion = typeof(SignDocsHttpClient).Assembly
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()!
+            .InformationalVersion.Split('+')[0];
+        Assert.Equal(packageVersion, SignDocsHttpClient.SdkVersion);
     }
 
     [Fact]
     public void UserAgent_ContainsVersion()
     {
-        Assert.Equal("signdocs-brasil-dotnet/1.8.0", SignDocsHttpClient.UserAgent);
+        Assert.Equal($"signdocs-brasil-dotnet/{SignDocsHttpClient.SdkVersion}",
+            SignDocsHttpClient.UserAgent);
     }
 
     [Fact]
