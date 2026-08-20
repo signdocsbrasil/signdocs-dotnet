@@ -60,6 +60,38 @@ public sealed class SigningSessionsResource
     }
 
     /// <summary>
+    /// Mints a fresh signing URL for an existing session and returns it, instead of
+    /// e-mailing it.
+    /// </summary>
+    /// <remarks>
+    /// <para>A signing link is single-use: once the signer finishes — or the embed
+    /// token is otherwise consumed — reopening the same URL returns
+    /// <c>401 Embed token has been consumed</c>. This issues a new one without
+    /// creating another transaction and without consuming quota. It works for
+    /// standalone and envelope sessions alike.</para>
+    /// <para>The session must be <c>ACTIVE</c>; a completed or cancelled one throws
+    /// <see cref="Errors.ConflictException"/>, since a link to a finished session
+    /// would authenticate nothing. Use <c>EnvelopesResource.CombinedStampAsync</c> or
+    /// <c>TransactionsResource.DownloadAsync</c> to reach the signed document instead.</para>
+    /// <para><c>ExpiresAt</c> is inherited from the original session and is not extended.</para>
+    /// <para><b>Authorises the tenant, not the end user.</b> The API cannot tell which
+    /// of your users is entitled to this link, so an application whose users share one
+    /// tenant must establish that itself before calling — otherwise this becomes a way
+    /// for one user to obtain another's signing credential.</para>
+    /// </remarks>
+    public async Task<MintSigningLinkResponse?> LinkAsync(
+        string sessionId,
+        TimeSpan? timeout = null,
+        CancellationToken ct = default)
+    {
+        return await _client.RequestAsync<MintSigningLinkResponse>(
+            HttpMethod.Post,
+            $"/v1/signing-sessions/{sessionId}/link",
+            timeout: timeout,
+            ct: ct).ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// Gets the full bootstrap data for a signing session.
     /// Used by the embedded signing widget to initialize the UI.
     /// </summary>

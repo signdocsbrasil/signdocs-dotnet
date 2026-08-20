@@ -86,7 +86,7 @@ match result with
 | `Verification` | `VerifyAsync()`, `DownloadsAsync()` |
 | `Users` | `EnrollAsync()` |
 | `Webhooks` | `RegisterAsync()`, `ListAsync()`, `DeleteAsync()`, `TestAsync()` |
-| `SigningSessions` | `CreateAsync()`, `GetStatusAsync()`, `CancelAsync()`, `ListAsync()`, `WaitForCompletionAsync()` |
+| `SigningSessions` | `CreateAsync()`, `GetStatusAsync()`, `CancelAsync()`, `LinkAsync()`, `ListAsync()`, `WaitForCompletionAsync()` |
 | `Envelopes` | `CreateAsync()`, `GetAsync()`, `AddSessionAsync()`, `CombinedStampAsync()` |
 | `DocumentGroups` | `CombinedStampAsync()` |
 
