@@ -65,17 +65,26 @@ public sealed class VerificationResource
     /// The document to inspect; <see cref="VerifyDocumentRequest.Content"/> must be
     /// the base64-encoded PDF.
     /// </param>
+    /// <param name="idempotencyKey">
+    /// Optional idempotency key; one is generated when omitted. The endpoint is
+    /// metered and its answer is a pure function of the PDF, so an unkeyed retry
+    /// pays the verification quota twice for an identical result.
+    /// </param>
     /// <param name="timeout">Optional per-request timeout override.</param>
     /// <param name="ct">Cancellation token.</param>
     public async Task<VerifyDocumentResponse?> VerifyDocumentAsync(
         VerifyDocumentRequest request,
+        string? idempotencyKey = null,
         TimeSpan? timeout = null,
         CancellationToken ct = default)
     {
-        return await _client.RequestAsync<VerifyDocumentResponse>(
+        // Metered, and the answer is a pure function of the PDF — an unkeyed
+        // retry pays the verification quota twice for an identical result.
+        return await _client.RequestWithIdempotencyAsync<VerifyDocumentResponse>(
             HttpMethod.Post,
             "/v1/verify/document",
             body: request,
+            idempotencyKey: idempotencyKey,
             timeout: timeout,
             ct: ct).ConfigureAwait(false);
     }

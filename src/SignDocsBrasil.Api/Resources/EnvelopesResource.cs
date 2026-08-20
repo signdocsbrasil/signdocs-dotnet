@@ -47,16 +47,31 @@ public sealed class EnvelopesResource
     /// <summary>
     /// Adds a signing session to an envelope for a specific signer.
     /// </summary>
+    /// <remarks>
+    /// An X-Idempotency-Key header is set automatically. It matters more here
+    /// than on most calls: this response carries the only copy of
+    /// <c>ClientSecret</c>, and the client retries 429/500/503 — so an unkeyed
+    /// retry creates a second signer, charges the quota again and sends a
+    /// second invitation.
+    /// <para>
+    /// Pass a distinct key per signer. The API scopes its idempotency cache by
+    /// key and resolved path, and every signer on an envelope shares that path,
+    /// so one key across the loop returns signer 1's response — and signer 1's
+    /// ClientSecret — for signer 2.
+    /// </para>
+    /// </remarks>
     public async Task<EnvelopeSession?> AddSessionAsync(
         string envelopeId,
         AddEnvelopeSessionRequest request,
+        string? idempotencyKey = null,
         TimeSpan? timeout = null,
         CancellationToken ct = default)
     {
-        return await _client.RequestAsync<EnvelopeSession>(
+        return await _client.RequestWithIdempotencyAsync<EnvelopeSession>(
             HttpMethod.Post,
             $"/v1/envelopes/{envelopeId}/sessions",
             body: request,
+            idempotencyKey: idempotencyKey,
             timeout: timeout,
             ct: ct).ConfigureAwait(false);
     }

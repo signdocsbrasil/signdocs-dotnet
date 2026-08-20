@@ -372,4 +372,54 @@ public class ResourcesTests : IDisposable
         Assert.NotNull(result!.Document);
         Assert.Equal("contract.pdf", result.Document!.Filename);
     }
+
+    // --- Idempotency on AddSession / VerifyDocument ---
+
+    [Fact]
+    public async Task Envelopes_AddSession_SetsIdempotencyKey()
+    {
+        // AddSession went unkeyed while the client retries 429/500/503, so a
+        // 500 became a second signer, a second quota charge and a second
+        // invitation — and this response carries the only copy of ClientSecret.
+        _handler.EnqueueToken();
+        _handler.EnqueueJson(201, "{\"sessionId\":\"ss_1\"}");
+
+        await new EnvelopesResource(_client).AddSessionAsync(
+            "env_1", new AddEnvelopeSessionRequest(), idempotencyKey: "idem-signer-1");
+
+        HttpRequestMessage apiRequest = _handler.Requests[1];
+        Assert.Equal("idem-signer-1",
+            apiRequest.Headers.GetValues("X-Idempotency-Key").First());
+    }
+
+    [Fact]
+    public async Task Envelopes_AddSession_GeneratesKeyWhenOmitted()
+    {
+        _handler.EnqueueToken();
+        _handler.EnqueueJson(201, "{\"sessionId\":\"ss_1\"}");
+
+        await new EnvelopesResource(_client).AddSessionAsync(
+            "env_1", new AddEnvelopeSessionRequest());
+
+        HttpRequestMessage apiRequest = _handler.Requests[1];
+        Assert.True(apiRequest.Headers.Contains("X-Idempotency-Key"),
+            "AddSession sent no X-Idempotency-Key; an unkeyed retry double-charges");
+    }
+
+    [Fact]
+    public async Task Verification_VerifyDocument_SetsIdempotencyKey()
+    {
+        // Metered, and the answer is a pure function of the PDF — an unkeyed
+        // retry paid the verification quota twice for an identical result.
+        _handler.EnqueueToken();
+        _handler.EnqueueJson(200,
+            "{\"signed\":false,\"signatureCount\":0,\"signatures\":[],\"checkedAt\":\"2024-11-15T00:00:00.000Z\"}");
+
+        await new VerificationResource(_client).VerifyDocumentAsync(
+            new VerifyDocumentRequest { Content = "JVBERi0xLjQK" }, idempotencyKey: "idem-vd-1");
+
+        HttpRequestMessage apiRequest = _handler.Requests[1];
+        Assert.Equal("idem-vd-1",
+            apiRequest.Headers.GetValues("X-Idempotency-Key").First());
+    }
 }
