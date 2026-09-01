@@ -80,6 +80,28 @@ public class CreateSigningSessionRequest
     public Owner? Owner { get; set; }
 
     /// <summary>
+    /// Biometric reference image for this session. See <see cref="SessionReferenceImage"/>.
+    /// </summary>
+    [JsonPropertyName("referenceImage")]
+    public SessionReferenceImage? ReferenceImage { get; set; }
+
+    /// <summary>
+    /// Biometric reference image, base64 JPEG, max 5MB.
+    /// </summary>
+    /// <remarks>
+    /// Decides which face the BIOMETRIC_MATCH step compares the captured
+    /// liveness against. When set, it takes precedence over the user's stored
+    /// enrolment — which is what lets a session be signed by someone who was
+    /// never enrolled.
+    /// </remarks>
+    public class SessionReferenceImage
+    {
+        /// <summary>Reference image, base64-encoded JPEG.</summary>
+        [JsonPropertyName("content")]
+        public string? Content { get; set; }
+    }
+
+    /// <summary>
     /// Inline document for a signing session.
     /// </summary>
     public class SessionDocument

@@ -48,6 +48,12 @@ public enum WebhookEvent
     [EnumMember(Value = "STEP.PURPOSE_DISCLOSURE_SENT")]
     StepPurposeDisclosureSent,
 
+    [EnumMember(Value = "ENROLLMENT.EXPIRING")]
+    EnrollmentExpiring,
+
+    [EnumMember(Value = "ENROLLMENT.EXPIRED")]
+    EnrollmentExpired,
+
     [EnumMember(Value = "QUOTA.WARNING")]
     QuotaWarning,
 

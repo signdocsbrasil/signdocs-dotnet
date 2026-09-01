@@ -18,6 +18,11 @@ public class WebhookEventTests
         "STEP.COMPLETED",
         "STEP.FAILED",
         "STEP.PURPOSE_DISCLOSURE_SENT",
+        // Added when the enrolment-expiry sweep landed in the spec. This list
+        // is a tripwire on purpose: a spec addition should fail here until
+        // someone decides the SDK models it too.
+        "ENROLLMENT.EXPIRING",
+        "ENROLLMENT.EXPIRED",
         "QUOTA.WARNING",
         "API.DEPRECATION_NOTICE",
         "SIGNING_SESSION.CREATED",
@@ -33,7 +38,7 @@ public class WebhookEventTests
     public void WebhookEvent_HasAllCanonicalEvents()
     {
         Array values = Enum.GetValues(typeof(WebhookEvent));
-        Assert.Equal(20, values.Length);
+        Assert.Equal(22, values.Length);
     }
 
     [Fact]
