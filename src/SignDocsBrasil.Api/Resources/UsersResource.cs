@@ -62,4 +62,25 @@ public sealed class UsersResource
             timeout: timeout,
             ct: ct).ConfigureAwait(false);
     }
+
+    /// <summary>Enrols up to 25 users in one request.</summary>
+    /// <remarks>
+    /// The documented cap is 25 rows, but the binding limit is the request body
+    /// — roughly 6MB, and base64 inflates each photo by a third. Keep photos
+    /// under ~175KB (640x640 is ample) to use all 25 slots.
+    ///
+    /// Set DryRun on the request to inspect the photos without storing anything.
+    /// </remarks>
+    public async Task<EnrollUsersBatchResponse?> EnrollBatchAsync(
+        EnrollUsersBatchRequest request,
+        TimeSpan? timeout = null,
+        CancellationToken ct = default)
+    {
+        return await _client.RequestAsync<EnrollUsersBatchResponse>(
+            HttpMethod.Post,
+            "/v1/users/enrollments",
+            body: request,
+            timeout: timeout,
+            ct: ct).ConfigureAwait(false);
+    }
 }
