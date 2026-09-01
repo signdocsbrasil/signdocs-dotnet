@@ -83,4 +83,25 @@ public sealed class UsersResource
             timeout: timeout,
             ct: ct).ConfigureAwait(false);
     }
+
+    /// <summary>Inspects one candidate photo without storing it.</summary>
+    /// <remarks>
+    /// Same verdict the batch endpoint returns, from the same code — a photo
+    /// must not be judged differently depending on which endpoint you asked.
+    /// Nothing is persisted and the 90-day retention clock never starts.
+    /// </remarks>
+    public async Task<InspectEnrollmentResponse?> InspectAsync(
+        string userExternalId,
+        EnrollUserRequest request,
+        TimeSpan? timeout = null,
+        CancellationToken ct = default)
+    {
+        request.DryRun = true;
+        return await _client.RequestAsync<InspectEnrollmentResponse>(
+            HttpMethod.Put,
+            $"/v1/users/{userExternalId}/enrollment",
+            body: request,
+            timeout: timeout,
+            ct: ct).ConfigureAwait(false);
+    }
 }

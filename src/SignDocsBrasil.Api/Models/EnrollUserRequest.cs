@@ -12,4 +12,10 @@ public class EnrollUserRequest
 
     [JsonPropertyName("source")]
     public string? Source { get; set; }
+
+    // Inspect without writing. Returns the same verdict the batch endpoint
+    // gives and persists nothing — no image, no record, and the 90-day
+    // retention clock never starts.
+    [JsonPropertyName("dryRun")]
+    public bool? DryRun { get; set; }
 }
