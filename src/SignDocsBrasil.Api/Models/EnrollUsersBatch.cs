@@ -57,8 +57,13 @@ public record BatchEnrollmentResult(
     [property: JsonPropertyName("pose")] FacePoseMetrics? Pose = null,
     // Face area as a fraction of the frame, 0-1. Dry run only.
     [property: JsonPropertyName("faceCoverage")] double? FaceCoverage = null,
-    // Empty on a clean photo. Dry run only.
-    [property: JsonPropertyName("warnings")] List<string>? Warnings = null
+    // Empty on a clean photo.
+    [property: JsonPropertyName("warnings")] List<string>? Warnings = null,
+
+    // Whether the photo works as a reference. Separate from Status, which says
+    // what happened to the write: a row can be Status "enrolled" with
+    // ReferenceQuality "marginal".
+    [property: JsonPropertyName("referenceQuality")] string? ReferenceQuality = null
 );
 
 /// <summary>Result of a batch enrollment.</summary>
