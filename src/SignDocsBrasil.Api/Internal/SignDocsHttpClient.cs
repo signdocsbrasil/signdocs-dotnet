@@ -17,7 +17,7 @@ namespace SignDocsBrasil.Api.Internal;
 /// </summary>
 internal sealed class SignDocsHttpClient : IDisposable
 {
-    internal const string SdkVersion = "1.14.0";
+    internal const string SdkVersion = "2.0.0";
     internal const string UserAgent = "signdocs-brasil-dotnet/" + SdkVersion;
 
     private readonly HttpClient _httpClient;

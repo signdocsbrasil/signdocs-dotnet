@@ -14,9 +14,6 @@ public class WebhookEventTests
         "TRANSACTION.EXPIRED",
         "TRANSACTION.FALLBACK",
         "TRANSACTION.DEADLINE_APPROACHING",
-        "STEP.STARTED",
-        "STEP.COMPLETED",
-        "STEP.FAILED",
         "STEP.PURPOSE_DISCLOSURE_SENT",
         // Added when the enrolment-expiry sweep landed in the spec. This list
         // is a tripwire on purpose: a spec addition should fail here until
@@ -31,6 +28,7 @@ public class WebhookEventTests
         "SIGNING_SESSION.EXPIRED",
         "ENVELOPE.CREATED",
         "ENVELOPE.ALL_SIGNED",
+        "ENVELOPE.CANCELLED",
         "ENVELOPE.EXPIRED",
     };
 
@@ -38,7 +36,7 @@ public class WebhookEventTests
     public void WebhookEvent_HasAllCanonicalEvents()
     {
         Array values = Enum.GetValues(typeof(WebhookEvent));
-        Assert.Equal(22, values.Length);
+        Assert.Equal(20, values.Length);
     }
 
     [Fact]

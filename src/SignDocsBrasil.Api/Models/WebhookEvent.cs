@@ -35,15 +35,6 @@ public enum WebhookEvent
     [EnumMember(Value = "TRANSACTION.DEADLINE_APPROACHING")]
     TransactionDeadlineApproaching,
 
-    [EnumMember(Value = "STEP.STARTED")]
-    StepStarted,
-
-    [EnumMember(Value = "STEP.COMPLETED")]
-    StepCompleted,
-
-    [EnumMember(Value = "STEP.FAILED")]
-    StepFailed,
-
     /// <summary>(NT65) Purpose-disclosure notification delivered to the beneficiary.</summary>
     [EnumMember(Value = "STEP.PURPOSE_DISCLOSURE_SENT")]
     StepPurposeDisclosureSent,
@@ -77,6 +68,9 @@ public enum WebhookEvent
 
     [EnumMember(Value = "ENVELOPE.ALL_SIGNED")]
     EnvelopeAllSigned,
+
+    [EnumMember(Value = "ENVELOPE.CANCELLED")]
+    EnvelopeCancelled,
 
     [EnumMember(Value = "ENVELOPE.EXPIRED")]
     EnvelopeExpired,
