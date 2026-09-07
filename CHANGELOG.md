@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.1] - 2026-09-07
+
+### Changed
+
+- Documented that `EnrollUserRequest.Source` takes `ORGANIZATION_PROVIDED`
+  (the default when omitted), `FIRST_LIVENESS` or `DOCUMENT_PHOTO`.
+  `BANK_PROVIDED` is the former name of `ORGANIZATION_PROVIDED` and is still accepted.
+- Package description and keywords now lead in Portuguese, so the SDK is
+  findable on NuGet for "assinatura digital" and "assinatura eletrônica"
+  rather than only by name.
+
 ## [2.0.0] - 2026-09-02
 
 ### Removed
