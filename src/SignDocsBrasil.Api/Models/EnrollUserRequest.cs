@@ -10,6 +10,9 @@ public class EnrollUserRequest
     [JsonPropertyName("cpf")]
     public string? Cpf { get; set; }
 
+    // ORGANIZATION_PROVIDED (the default when omitted), FIRST_LIVENESS or
+    // DOCUMENT_PHOTO. BANK_PROVIDED is the former name of ORGANIZATION_PROVIDED
+    // and is still accepted, normalised away on write.
     [JsonPropertyName("source")]
     public string? Source { get; set; }
 
