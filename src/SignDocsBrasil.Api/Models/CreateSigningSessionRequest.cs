@@ -86,6 +86,20 @@ public class CreateSigningSessionRequest
     public SessionReferenceImage? ReferenceImage { get; set; }
 
     /// <summary>
+    /// Channels SignDocs uses to deliver the signing link to this signer:
+    /// <c>email</c>, <c>whatsapp</c> and/or <c>telegram</c>. Leave <c>null</c>
+    /// to keep the previous behavior (the invite email only).
+    /// </summary>
+    /// <remarks>
+    /// WhatsApp and Telegram are enabled on request. <c>whatsapp</c> requires
+    /// <c>signer.phone</c> in E.164; <c>telegram</c> requires <c>signer.cpf</c>.
+    /// Each WhatsApp or Telegram send consumes the tenant's message quota; once
+    /// it runs out the API responds 429.
+    /// </remarks>
+    [JsonPropertyName("deliverVia")]
+    public List<string>? DeliverVia { get; set; }
+
+    /// <summary>
     /// Biometric reference image, base64 JPEG, max 5MB.
     /// </summary>
     /// <remarks>

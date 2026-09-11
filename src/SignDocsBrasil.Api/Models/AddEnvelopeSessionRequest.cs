@@ -50,6 +50,19 @@ public class AddEnvelopeSessionRequest
     public Dictionary<string, string>? Metadata { get; set; }
 
     /// <summary>
+    /// Channels SignDocs uses to deliver the signing link to this signer:
+    /// <c>email</c>, <c>whatsapp</c> and/or <c>telegram</c>. Leave <c>null</c>
+    /// to keep the previous behavior (the invite email only).
+    /// </summary>
+    /// <remarks>
+    /// In a SEQUENTIAL envelope a later signer receives the link over these
+    /// channels when their turn comes. Same rules as
+    /// <see cref="CreateSigningSessionRequest.DeliverVia"/>.
+    /// </remarks>
+    [JsonPropertyName("deliverVia")]
+    public List<string>? DeliverVia { get; set; }
+
+    /// <summary>
     /// Signer data for an envelope session.
     /// </summary>
     public class EnvelopeSessionSigner

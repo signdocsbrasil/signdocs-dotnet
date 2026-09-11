@@ -1,5 +1,32 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- `DeliverVia` (`List<string>?`) on `CreateSigningSessionRequest` and
+  `AddEnvelopeSessionRequest`: the channels SignDocs uses to deliver the
+  signing link to that signer, `email`, `whatsapp` and/or `telegram`. Leave it
+  `null` and nothing changes: the invite email only, as before. WhatsApp and
+  Telegram are enabled per tenant on request; `whatsapp` requires
+  `signer.phone` in E.164 and `telegram` requires `signer.cpf`. Each WhatsApp
+  or Telegram send consumes the tenant's message quota; once it runs out the
+  API responds 429.
+- `WhatsAppInviteSent` and `TelegramInviteSent` (`bool?`) on `SigningSession`
+  and `EnvelopeSession`, next to `InviteSent`. `WhatsAppInviteSent` is `true`
+  only when Meta accepted the message (accepted, not delivered) and `null`
+  otherwise; `TelegramInviteSent` is set whenever `telegram` was requested,
+  `false` when the link did not reach the signer.
+
+### Changed
+
+- OTP channels: the API accepts `whatsapp` and `telegram` alongside `email`
+  and `sms`. The SDK already passes the channel as a plain `string`, so no
+  signature changes; the `ResendOtpAsync` doc comment now lists `telegram`.
+  - **Heads-up:** `AvailableOtpChannels` on the `SigningSessionBootstrap`
+    signer can now contain `whatsapp` or `telegram`. A `switch` expression over
+    it without a discard (`_`) arm throws `SwitchExpressionException` on them.
+
 ## [2.0.1] - 2026-09-07
 
 ### Changed

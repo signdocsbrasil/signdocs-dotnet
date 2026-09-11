@@ -18,6 +18,15 @@ namespace SignDocsBrasil.Api.Models;
 /// was created with an <c>owner</c> and the signer's email differs from
 /// <c>owner.email</c>.
 /// </param>
+/// <param name="WhatsAppInviteSent">
+/// <c>true</c> when Meta accepted the WhatsApp message carrying the link —
+/// accepted, not delivered. <c>null</c> otherwise.
+/// </param>
+/// <param name="TelegramInviteSent">
+/// Result of the Telegram delivery, set whenever <c>deliverVia</c> included
+/// <c>telegram</c>. <c>false</c> means the link did not reach the signer over
+/// Telegram (no CPF registered with the bot, or the send failed).
+/// </param>
 public record EnvelopeSession(
     [property: JsonPropertyName("sessionId")] string? SessionId,
     [property: JsonPropertyName("transactionId")] string? TransactionId,
@@ -26,5 +35,7 @@ public record EnvelopeSession(
     [property: JsonPropertyName("url")] string? Url,
     [property: JsonPropertyName("clientSecret")] string? ClientSecret,
     [property: JsonPropertyName("expiresAt")] string? ExpiresAt,
-    [property: JsonPropertyName("inviteSent")] bool? InviteSent = null
+    [property: JsonPropertyName("inviteSent")] bool? InviteSent = null,
+    [property: JsonPropertyName("whatsappInviteSent")] bool? WhatsAppInviteSent = null,
+    [property: JsonPropertyName("telegramInviteSent")] bool? TelegramInviteSent = null
 );

@@ -143,7 +143,7 @@ public sealed class SigningSessionsResource
 
     /// <summary>
     /// Resends the OTP challenge for a signing session, optionally selecting
-    /// the delivery channel (e.g. "sms", "email", "whatsapp").
+    /// the delivery channel (e.g. "sms", "email", "whatsapp", "telegram").
     /// </summary>
     public async Task<AdvanceSessionResponse?> ResendOtpAsync(
         string sessionId,

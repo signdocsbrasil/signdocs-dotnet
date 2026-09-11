@@ -120,6 +120,29 @@ var session2 = await client.Envelopes.AddSessionAsync(envelope.EnvelopeId, new A
 Console.WriteLine($"{session1.Url} {session2.Url}");
 ```
 
+## Delivery Channels
+
+SignDocs delivers the signing link by email, WhatsApp or Telegram — choose per signer with `deliverVia`. WhatsApp and Telegram are enabled on request; talk to the sales team. WhatsApp requires `signer.phone` in E.164; Telegram requires `signer.cpf` and only reaches people who have already registered their CPF with the SignDocs bot. The OTP can go by `email`, `sms`, `whatsapp` or `telegram` (`otpChannel`), regardless of which channel carries the link. Each WhatsApp or Telegram send consumes the tenant's message quota; once it runs out, the API responds 429.
+
+```csharp
+var session = await client.SigningSessions.CreateAsync(new CreateSigningSessionRequest
+{
+    Purpose = "DOCUMENT_SIGNATURE",
+    Policy = new Policy { Profile = "CLICK_ONLY" },
+    Signer = new Signer
+    {
+        Name = "João Silva",
+        UserExternalId = "user-001",
+        Cpf = "12345678901",
+        Phone = "+5511999998888",
+    },
+    Document = new CreateSigningSessionRequest.SessionDocument { Content = pdfBase64, Filename = "contrato.pdf" },
+    DeliverVia = new List<string> { "whatsapp" },
+});
+
+Console.WriteLine(session?.WhatsAppInviteSent); // true when Meta accepted the message
+```
+
 ## Error Handling
 
 ### C#
