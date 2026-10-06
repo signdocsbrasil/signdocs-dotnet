@@ -28,5 +28,6 @@ public record VerificationStep(
     [property: JsonPropertyName("type")] string? Type,
     [property: JsonPropertyName("status")] string? Status,
     [property: JsonPropertyName("order")] int Order,
-    [property: JsonPropertyName("completedAt")] string? CompletedAt
+    [property: JsonPropertyName("completedAt")] string? CompletedAt,
+    [property: JsonPropertyName("signatureTimestamp")] SignatureTimestamp? SignatureTimestamp = null
 );

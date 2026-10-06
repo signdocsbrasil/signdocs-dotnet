@@ -1,5 +1,19 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Support for the ICP-Brasil signature timestamp (carimbo do tempo). On tenants with the
+  feature, the server embeds an RFC 3161 token from an accredited ACT in every digital-certificate
+  signature (PAdES-B-T / CAdES-T). Nothing changes in the signing flow.
+- `SignatureTimestamp` record and `SignatureTimestamp` on `DigitalSignatureResult` (used by
+  `CompleteSigningResponse`) and `VerificationStep`.
+- `SignedP7sHash` and `DocumentFormat` on `DigitalSignatureResult`.
+- `ProblemDetail.Code` / `ProblemDetail.Retryable` and `ApiException.Code`. A 503 with
+  `Code == "TIMESTAMP_UNAVAILABLE"` means the ACT was unavailable: resend the same signature
+  after `Retry-After`.
+
 ## [2.1.0] - 2026-09-11
 
 ### Added

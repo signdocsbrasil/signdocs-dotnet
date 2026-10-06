@@ -356,4 +356,40 @@ public class ModelsTests
         Assert.False(doc.RootElement.TryGetProperty("metadata", out _));
         Assert.False(doc.RootElement.TryGetProperty("documentGroupId", out _));
     }
+
+    // --- Signature timestamp (carimbo do tempo) ---
+
+    [Fact]
+    public void CompleteSigningResponse_WithSignatureTimestamp()
+    {
+        string json = FixtureLoader.LoadResponseBody("signing-complete-timestamp.json");
+        var resp = JsonSerializer.Deserialize<CompleteSigningResponse>(json, SignDocsHttpClient.JsonOptions);
+        var ts = resp!.Result!.DigitalSignature!.SignatureTimestamp;
+
+        Assert.NotNull(ts);
+        Assert.Equal("2024-11-15T12:05:02.123Z", ts!.GenTime);
+        Assert.Equal("2.16.76.1.6.2", ts.PolicyOid);
+        Assert.Equal("78F42C1F9B1D36B9", ts.Serial);
+    }
+
+    [Fact]
+    public void CompleteSigningResponse_WithoutSignatureTimestamp()
+    {
+        string json = FixtureLoader.LoadResponseBody("signing-complete.json");
+        var resp = JsonSerializer.Deserialize<CompleteSigningResponse>(json, SignDocsHttpClient.JsonOptions);
+
+        Assert.Null(resp!.Result!.DigitalSignature!.SignatureTimestamp);
+    }
+
+    [Fact]
+    public void ProblemDetail_ExposesTimestampUnavailableCode()
+    {
+        string json = FixtureLoader.LoadResponseBody("error-503-timestamp.json");
+        var pd = JsonSerializer.Deserialize<SignDocsBrasil.Api.Errors.ProblemDetail>(json, SignDocsHttpClient.JsonOptions);
+
+        Assert.Equal(503, pd!.Status);
+        Assert.Equal("TIMESTAMP_UNAVAILABLE", pd.Code);
+        Assert.True(pd.Retryable);
+        Assert.Equal("TIMESTAMP_UNAVAILABLE", new SignDocsBrasil.Api.Errors.ServiceUnavailableException(pd).Code);
+    }
 }

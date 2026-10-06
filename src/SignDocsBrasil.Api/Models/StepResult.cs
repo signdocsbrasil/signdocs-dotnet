@@ -47,7 +47,24 @@ public record DigitalSignatureResult(
     [property: JsonPropertyName("signedAt")] string? SignedAt,
     [property: JsonPropertyName("signedPdfHash")] string? SignedPdfHash,
     [property: JsonPropertyName("signedPdfS3Key")] string? SignedPdfS3Key,
-    [property: JsonPropertyName("signatureFieldName")] string? SignatureFieldName
+    [property: JsonPropertyName("signatureFieldName")] string? SignatureFieldName,
+    [property: JsonPropertyName("signedP7sHash")] string? SignedP7sHash = null,
+    [property: JsonPropertyName("documentFormat")] string? DocumentFormat = null,
+    [property: JsonPropertyName("signatureTimestamp")] SignatureTimestamp? SignatureTimestamp = null
+);
+
+/// <summary>
+/// ICP-Brasil signature timestamp (carimbo do tempo) embedded in the signature: an RFC 3161 token
+/// from an accredited ACT. Present only for tenants with the feature. <c>GenTime</c> is the time
+/// attested by the ACT; <c>SignedAt</c> on the signature result remains the SignDocs server time.
+/// The public verification endpoint returns only GenTime, TsaName and PolicyOid.
+/// </summary>
+public record SignatureTimestamp(
+    [property: JsonPropertyName("genTime")] string? GenTime,
+    [property: JsonPropertyName("tsaName")] string? TsaName,
+    [property: JsonPropertyName("serial")] string? Serial,
+    [property: JsonPropertyName("policyOid")] string? PolicyOid,
+    [property: JsonPropertyName("tokenSha256")] string? TokenSha256
 );
 
 public record PurposeDisclosureResult(
