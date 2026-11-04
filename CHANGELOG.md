@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- `SigningSessions.ResendInviteAsync(...)` for
+  `POST /v1/signing-sessions/{sessionId}/resend-invite`, with `ResendSigningInviteRequest` and
+  `ResendSigningInviteResponse`. Carries an idempotency key, generated when none is passed, so
+  automatic retries do not send a second message.
+
 ## [2.2.0] - 2026-10-05
 
 ### Added

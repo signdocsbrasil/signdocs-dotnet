@@ -92,6 +92,61 @@ public sealed class SigningSessionsResource
     }
 
     /// <summary>
+    /// Resends the invite of an <c>ACTIVE</c> session on the channels the signer was
+    /// created with (e-mail for sessions with none recorded).
+    /// </summary>
+    /// <remarks>
+    /// <para>The API issues a new link and sends it to the signer; it is not returned
+    /// here (use <see cref="LinkAsync"/> for that). The previous link stays valid until
+    /// the session expires.</para>
+    /// <para>Limited to one resend per session every 60 seconds. Inside that interval
+    /// the API returns 409 with the time remaining; it also returns 409 when the session
+    /// is not <c>ACTIVE</c>, or when e-mail is requested and the session has no signer
+    /// e-mail. WhatsApp and Telegram sends consume the tenant's message quota: once it
+    /// runs out the API returns 429 before generating a link or sending anything.</para>
+    /// <para>A key is generated when none is passed and reused across the client's
+    /// automatic retries, so a retry does not send a second message. Pass your own to
+    /// protect your retries too, and a new one per intended resend: repeating a finished
+    /// key within 24h returns the original answer and sends nothing.</para>
+    /// </remarks>
+    public async Task<ResendSigningInviteResponse?> ResendInviteAsync(
+        string sessionId,
+        string? idempotencyKey = null,
+        TimeSpan? timeout = null,
+        CancellationToken ct = default)
+    {
+        return await _client.RequestWithIdempotencyAsync<ResendSigningInviteResponse>(
+            HttpMethod.Post,
+            $"/v1/signing-sessions/{sessionId}/resend-invite",
+            idempotencyKey: idempotencyKey,
+            timeout: timeout,
+            ct: ct).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Resends the invite of an <c>ACTIVE</c> session on the channels in <paramref name="request"/>.
+    /// </summary>
+    /// <remarks>
+    /// See <see cref="ResendInviteAsync(string, string?, TimeSpan?, CancellationToken)"/> for the
+    /// limits that apply.
+    /// </remarks>
+    public async Task<ResendSigningInviteResponse?> ResendInviteAsync(
+        string sessionId,
+        ResendSigningInviteRequest request,
+        string? idempotencyKey = null,
+        TimeSpan? timeout = null,
+        CancellationToken ct = default)
+    {
+        return await _client.RequestWithIdempotencyAsync<ResendSigningInviteResponse>(
+            HttpMethod.Post,
+            $"/v1/signing-sessions/{sessionId}/resend-invite",
+            body: request,
+            idempotencyKey: idempotencyKey,
+            timeout: timeout,
+            ct: ct).ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// Gets the full bootstrap data for a signing session.
     /// Used by the embedded signing widget to initialize the UI.
     /// </summary>
